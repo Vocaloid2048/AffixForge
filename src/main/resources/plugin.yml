@@ -1,0 +1,12 @@
+name: AffixForge
+version: '${version}'
+
+main: com.voc2048.affixForge.AffixForge
+api-version: '1.20'
+load: POSTWORLD
+
+commands:
+  affix:
+    description: "Affix management command"
+    usage: "/affix give <quality>"
+    permission: "affixforge.admin"

@@ -1,0 +1,38 @@
+# 詞條池配置
+affixes:
+  max_health:
+    name: "最大生命值"
+    type: BASE_STAT
+    min_value: 1.0
+    max_value: 10.0
+    weight: 10
+  attack_damage:
+    name: "攻擊傷害"
+    type: BASE_STAT
+    min_value: 0.5
+    max_value: 5.0
+    weight: 10
+  movement_speed:
+    name: "移動速度"
+    type: BASE_STAT
+    min_value: 0.01
+    max_value: 0.1
+    weight: 5
+  crit_rate:
+    name: "暴擊率"
+    type: SPECIAL_MECHANIC
+    min_value: 0.01
+    max_value: 0.15
+    weight: 5
+  life_steal:
+    name: "生命偷取"
+    type: SPECIAL_MECHANIC
+    min_value: 0.01
+    max_value: 0.05
+    weight: 3
+  wither_touch:
+    name: "凋零觸碰"
+    type: ELEMENTAL_EFFECT
+    min_value: 1.0
+    max_value: 3.0
+    weight: 2
