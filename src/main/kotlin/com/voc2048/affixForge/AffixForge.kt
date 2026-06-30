@@ -1,7 +1,7 @@
 package com.voc2048.affixForge
 
 import com.voc2048.affixForge.command.AffixCommand
-import com.voc2048.affixForge.data.AffixPool
+import com.voc2048.affixForge.data.AffixRegistry
 import com.voc2048.affixForge.data.Keys
 import com.voc2048.affixForge.listener.PlayerStatListener
 import com.voc2048.affixForge.logic.StatManager
@@ -11,7 +11,7 @@ class AffixForge : JavaPlugin() {
 
     override fun onEnable() {
         Keys.init(this)
-        AffixPool.load(this)
+        AffixRegistry.load(this)
         StatManager.init(this)
         
         getCommand("affix")?.setExecutor(AffixCommand(this))

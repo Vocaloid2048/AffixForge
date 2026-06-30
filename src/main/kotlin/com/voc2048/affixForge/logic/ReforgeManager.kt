@@ -1,7 +1,7 @@
 package com.voc2048.affixForge.logic
 
 import com.voc2048.affixForge.data.AffixListDataType
-import com.voc2048.affixForge.data.AffixPool
+import com.voc2048.affixForge.data.AffixRegistry
 import com.voc2048.affixForge.data.Keys
 import com.voc2048.affixForge.model.EquipmentAffix
 import com.voc2048.affixForge.model.ReforgeQuality
@@ -66,10 +66,11 @@ object ReforgeManager {
                 var newAffix: EquipmentAffix? = null
                 
                 while (attempts < 10) {
-                    val template = AffixPool.getRandomTemplate()
-                    if (template != null && !usedTemplateIds.contains(template.id)) {
-                        val rolledValue = rollValue(template.minValue, template.maxValue)
-                        newAffix = EquipmentAffix(template.id, template.name, template.type, rolledValue)
+                    val template = AffixRegistry.getRandomTemplate(usedTemplateIds)
+                    if (template != null) {
+                        val rolledValue = rollValue(template.baseValue, template.baseValue + template.valuePerLevel * (template.maxLevel - 1)) // Just a guess, reforge might roll random level?
+                        // User said reforge rolls initial LV 1词條 in rollRandomAffixes, so let's stick to baseValue for reforge too if it's new
+                        newAffix = EquipmentAffix(template.id, template.displayName, template.type, template.baseValue, 1)
                         usedTemplateIds.add(template.id)
                         break
                     }

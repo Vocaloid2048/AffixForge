@@ -2,8 +2,8 @@ package com.voc2048.affixForge.command
 
 import com.voc2048.affixForge.data.AffixListDataType
 import com.voc2048.affixForge.data.Keys
+import com.voc2048.affixForge.data.AffixRegistry
 import com.voc2048.affixForge.gui.ReforgeGUI
-import com.voc2048.affixForge.logic.AffixGenerator
 import com.voc2048.affixForge.logic.ReforgeManager
 import com.voc2048.affixForge.model.ReforgeQuality
 import com.voc2048.affixForge.model.ReforgeResult
@@ -46,7 +46,7 @@ class AffixCommand(private val plugin: JavaPlugin) : CommandExecutor, TabComplet
                     return true
                 }
 
-                val affixes = AffixGenerator.generateRandomAffixes(quality)
+                val affixes = AffixRegistry.rollRandomAffixes(quality)
                 val meta = item.itemMeta
 
                 meta.persistentDataContainer.set(Keys.QUALITY, org.bukkit.persistence.PersistentDataType.STRING, quality.name)

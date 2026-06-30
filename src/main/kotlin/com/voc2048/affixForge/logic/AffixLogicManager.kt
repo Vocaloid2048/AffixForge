@@ -1,5 +1,6 @@
 package com.voc2048.affixForge.logic
 
+import com.voc2048.affixForge.data.AffixRegistry
 import com.voc2048.affixForge.model.ReforgeQuality
 import com.voc2048.affixForge.util.*
 import com.voc2048.affixForge.renderer.AffixLoreRenderer
@@ -30,7 +31,13 @@ object AffixLogicManager {
         // 初始最大槽位依照品質設定 (例如 Common 2, Legendary 5)
         item.maxSlots = quality.maxAffixes 
 
-        // 轉移並清除附魔邏輯會在外部調用 extractEnchantments 後由調用者處理
+        // 生成初始詞條
+        val initialAffixes = AffixRegistry.rollRandomAffixes(quality)
+        item.setAffixes(initialAffixes)
+
+        // 渲染 Lore
+        AffixLoreRenderer.render(item, quality, initialAffixes)
+
         return true
     }
 

@@ -1,0 +1,48 @@
+# 詞條池配置 (Affix Registry)
+# 支援 StatAffix (數值類) 與 AbilityAffix (機制類)
+
+stat_affixes:
+  max_health:
+    display_name: "最大生命值"
+    max_level: 10
+    weight: 20
+    base_value: 2.0
+    value_per_level: 2.0
+  attack_damage:
+    display_name: "攻擊傷害"
+    max_level: 10
+    weight: 20
+    base_value: 1.0
+    value_per_level: 1.0
+  movement_speed:
+    display_name: "移動速度"
+    max_level: 5
+    weight: 10
+    base_value: 0.01
+    value_per_level: 0.01
+
+ability_affixes:
+  life_steal:
+    display_name: "生命偷取"
+    max_level: 5
+    weight: 5
+    base_value: 0.02
+    value_per_level: 0.01
+  crit_rate:
+    display_name: "暴擊率"
+    max_level: 5
+    weight: 10
+    base_value: 0.05
+    value_per_level: 0.03
+  crit_damage:
+    display_name: "暴擊傷害"
+    max_level: 5
+    weight: 8
+    base_value: 0.2
+    value_per_level: 0.1
+  berserker_contract:
+    display_name: "狂戰士契約"
+    max_level: 3
+    weight: 3
+    base_value: 0.08
+    value_per_level: 0.08
