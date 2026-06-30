@@ -67,10 +67,17 @@ object AffixLogicManager {
         
         if (target.level >= maxLevel) return false
         
-        // 升級邏輯：等級+1，數值按比例提升 (例如每級增加基礎值的 20%)
-        val baseValue = target.value / target.level
         val newLevel = target.level + 1
-        val newValue = baseValue * newLevel
+        
+        // 優先從 Registry 獲取最新配置的數值公式計算
+        val template = AffixRegistry.getTemplate(target.id)
+        val newValue = if (template != null) {
+            template.baseValue + (template.valuePerLevel * (newLevel - 1))
+        } else {
+            // 如果模板不存在，則使用舊的比例倍增
+            val baseValue = target.value / target.level
+            baseValue * newLevel
+        }
         
         affixes[index] = target.copy(level = newLevel, value = Math.round(newValue * 100) / 100.0)
         item.setAffixes(affixes)

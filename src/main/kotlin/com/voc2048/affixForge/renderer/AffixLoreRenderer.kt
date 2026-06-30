@@ -56,12 +56,12 @@ object AffixLoreRenderer {
                 val description = AffixValueRegistry.getDescription(affix.id, affix.level)
 
                 // 詞條行渲染:  ◆ 狂戰士契約 V (描述...)
+                // 使用單個 Component 構建，避免 newline() 導致的組件分離問題，並確保描述緊跟其後
                 val affixLine = Component.text(" ◆ ")
                     .color(NamedTextColor.GOLD)
                     .decoration(TextDecoration.ITALIC, false)
                     .append(Component.text("${affix.name} $romanLevel").color(NamedTextColor.YELLOW))
-                    .append(Component.newline()) // 將描述換行以增加可讀性
-                    .append(Component.text("   └ ").color(NamedTextColor.DARK_GRAY))
+                    .append(Component.text("\n   └ ").color(NamedTextColor.DARK_GRAY))
                     .append(Component.text(description).color(NamedTextColor.GRAY))
                 
                 lore.add(affixLine)
