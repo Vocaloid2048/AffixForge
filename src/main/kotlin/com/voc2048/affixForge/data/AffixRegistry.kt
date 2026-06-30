@@ -6,6 +6,8 @@ import com.voc2048.affixForge.model.ReforgeQuality
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
+import java.io.InputStreamReader
+import java.nio.charset.StandardCharsets
 
 data class AffixTemplate(
     val id: String,
@@ -27,11 +29,25 @@ object AffixRegistry {
             plugin.saveResource("affixes.yml", false)
         }
 
-        val config = YamlConfiguration.loadConfiguration(file)
+        // 強制使用 UTF-8 讀取，防止中文字元導致 YAML 解析失敗
+        val config = YamlConfiguration()
+        try {
+            file.inputStream().use { inputStream ->
+                config.load(InputStreamReader(inputStream, StandardCharsets.UTF_8))
+            }
+        } catch (e: Exception) {
+            plugin.logger.severe("無法載入 affixes.yml，請檢查檔案格式或編碼: ${e.message}")
+            return
+        }
+
         templates.clear()
         totalWeight = 0
 
-        val section = config.getConfigurationSection("affixes") ?: return
+        val section = config.getConfigurationSection("affixes")
+        if (section == null) {
+            plugin.logger.severe("affixes.yml 中找不到 'affixes' 節點！")
+            return
+        }
         for (id in section.getKeys(false)) {
             val displayName = section.getString("$id.display_name") ?: id
             val typeStr = section.getString("$id.type") ?: "ABILITY"
@@ -92,4 +108,11 @@ object AffixRegistry {
     }
 
     fun getTemplate(id: String): AffixTemplate? = templates[id]
+
+    fun getRandomTemplate(excludeIds: Set<String> = emptySet()): AffixTemplate? {
+        val pool = templates.values.filter { it.id !in excludeIds }
+        return pickWeighted(pool)
+    }
+
+    fun isEmpty(): Boolean = templates.isEmpty()
 }

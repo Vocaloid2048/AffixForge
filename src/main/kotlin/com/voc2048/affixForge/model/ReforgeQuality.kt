@@ -10,11 +10,11 @@ enum class ReforgeQuality(
     val minAffixes: Int,
     val maxAffixes: Int
 ) {
-    COMMON("普通", NamedTextColor.WHITE, 1, 2),
-    UNCOMMON("罕見", NamedTextColor.GREEN, 2, 3),
-    RARE("稀有", NamedTextColor.BLUE, 3, 4),
-    EPIC("史詩", NamedTextColor.LIGHT_PURPLE, 4, 5),
-    LEGENDARY("傳說", NamedTextColor.GOLD, 5, 5);
+    COMMON("普通", NamedTextColor.WHITE, 1, 1),
+    UNCOMMON("罕見", NamedTextColor.GREEN, 2, 2),
+    RARE("稀有", NamedTextColor.BLUE, 3, 3),
+    EPIC("史詩", NamedTextColor.LIGHT_PURPLE, 4, 4),
+    LEGENDARY("傳奇", NamedTextColor.GOLD, 5, 5);
 
     fun getFormattedName(): Component {
         return Component.text(displayName).color(color)

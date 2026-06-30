@@ -21,11 +21,17 @@ object AffixLoreRenderer {
      * 確保品質名與詞條描述均能正確顯示
      */
     fun render(item: ItemStack, quality: ReforgeQuality, affixes: List<EquipmentAffix>) {
-        val meta = item.itemMeta ?: return
+        item.editMeta { meta ->
+            renderWithMeta(item, meta, quality, affixes)
+        }
+    }
+
+    fun renderWithMeta(item: ItemStack, meta: org.bukkit.inventory.meta.ItemMeta, quality: ReforgeQuality, affixes: List<EquipmentAffix>) {
         val lore = mutableListOf<Component>()
 
         // 1. 品質與槽位信息
-        val maxSlots = item.maxSlots
+        // 注意：這裡直接從傳入的 meta 讀取或使用傳入的參數
+        val maxSlots = meta.persistentDataContainer.get(com.voc2048.affixForge.data.Keys.MAX_SLOTS, org.bukkit.persistence.PersistentDataType.INTEGER) ?: 0
         val usedSlots = affixes.size 
         
         lore.add(Component.empty())
@@ -72,6 +78,5 @@ object AffixLoreRenderer {
         lore.add(Component.text("--------------------").color(NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false))
 
         meta.lore(lore)
-        item.itemMeta = meta
     }
 }
