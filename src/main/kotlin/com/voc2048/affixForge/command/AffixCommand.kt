@@ -85,19 +85,45 @@ class AffixCommand : CommandExecutor, TabCompleter {
                     }
                 }
             }
+            "setaccessory" -> {
+                val item = sender.inventory.itemInMainHand
+                if (item.type.isAir) {
+                    sender.sendMessage(Component.text("請手持物品").color(NamedTextColor.RED))
+                    return true
+                }
+                val meta = item.itemMeta
+                meta.persistentDataContainer.set(Keys.CUSTOM_ACCESSORY, org.bukkit.persistence.PersistentDataType.BYTE, 1.toByte())
+                item.itemMeta = meta
+                sender.sendMessage(Component.text("已將該物品設置為自定義飾品").color(NamedTextColor.GREEN))
+            }
+            "setid" -> {
+                if (args.size < 2) return false
+                val item = sender.inventory.itemInMainHand
+                if (item.type.isAir) {
+                    sender.sendMessage(Component.text("請手持物品").color(NamedTextColor.RED))
+                    return true
+                }
+                val meta = item.itemMeta
+                meta.persistentDataContainer.set(Keys.SET_ID, org.bukkit.persistence.PersistentDataType.STRING, args[1])
+                item.itemMeta = meta
+                sender.sendMessage(Component.text("已將該物品的套裝 ID 設置為: ${args[1]}").color(NamedTextColor.GREEN))
+            }
         }
 
         return true
     }
 
     override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String> {
-        if (args.size == 1) return listOf("give", "reforge")
+        if (args.size == 1) return listOf("give", "reforge", "setaccessory", "setid")
         if (args.size == 2) {
             if (args[0] == "give") {
                 return ReforgeQuality.entries.map { it.name.lowercase() }.filter { it.startsWith(args[1].lowercase()) }
             }
             if (args[0] == "reforge") {
                 return listOf("1", "1,2", "1,2,3", "1,2,3,4")
+            }
+            if (args[0] == "setid") {
+                return listOf("warrior", "mage", "archer")
             }
         }
         return emptyList()

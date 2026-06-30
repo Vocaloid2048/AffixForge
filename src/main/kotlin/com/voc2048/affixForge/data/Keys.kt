@@ -6,9 +6,13 @@ import org.bukkit.plugin.java.JavaPlugin
 object Keys {
     lateinit var AFFIXES: NamespacedKey
     lateinit var QUALITY: NamespacedKey
+    lateinit var CUSTOM_ACCESSORY: NamespacedKey
+    lateinit var SET_ID: NamespacedKey
 
     fun init(plugin: JavaPlugin) {
         AFFIXES = NamespacedKey(plugin, "affixes")
         QUALITY = NamespacedKey(plugin, "quality")
+        CUSTOM_ACCESSORY = NamespacedKey(plugin, "custom_accessory")
+        SET_ID = NamespacedKey(plugin, "set_id")
     }
 }
