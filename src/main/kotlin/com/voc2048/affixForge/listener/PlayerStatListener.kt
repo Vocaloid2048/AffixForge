@@ -10,6 +10,8 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerSwapHandItemsEvent
 import org.bukkit.event.player.PlayerDropItemEvent
+import org.bukkit.event.player.PlayerItemHeldEvent
+import org.bukkit.event.player.PlayerRespawnEvent
 import org.bukkit.plugin.java.JavaPlugin
 
 class PlayerStatListener(private val plugin: JavaPlugin) : Listener {
@@ -41,8 +43,18 @@ class PlayerStatListener(private val plugin: JavaPlugin) : Listener {
         updateStats(event.player)
     }
 
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    fun onHeldItemChange(event: PlayerItemHeldEvent) {
+        updateStats(event.player)
+    }
+
     @EventHandler(priority = EventPriority.MONITOR)
     fun onJoin(event: PlayerJoinEvent) {
+        updateStats(event.player)
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    fun onRespawn(event: PlayerRespawnEvent) {
         updateStats(event.player)
     }
 

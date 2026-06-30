@@ -42,11 +42,8 @@ object StatManager {
         itemsToScan.add(player.inventory.itemInMainHand)
         itemsToScan.add(player.inventory.itemInOffHand)
         
-        player.inventory.contents.forEach { item ->
-            if (item != null && item.itemMeta?.persistentDataContainer?.has(Keys.CUSTOM_ACCESSORY, PersistentDataType.BYTE) == true) {
-                itemsToScan.add(item)
-            }
-        }
+        // 修正：不再掃描整個背包，僅限裝備欄與手持物品
+        // player.inventory.contents.forEach { item -> ... }
 
         itemsToScan.filterNotNull().distinct().forEach { item ->
             val meta = item.itemMeta ?: return@forEach
