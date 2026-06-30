@@ -1,128 +1,168 @@
-# AffixForge — 自定義詞條池配置
-# 依照 affixList.md 進行分類與權重設定
+# AffixForge — 全域詞條池配置
 
-stat_affixes:
-  # A 流派：戰術輸出
+affixes:
+  # 戰術輸出類
   berserker:
     display_name: "狂戰士契約"
+    type: ABILITY
     max_level: 5
     weight: 10
     base_value: 0.08
     value_per_level: 0.08
   armor_piercing:
     display_name: "破甲"
+    type: ABILITY
     max_level: 5
     weight: 15
     base_value: 0.10
     value_per_level: 0.10
   backstab:
     display_name: "背擊加成"
+    type: ABILITY
     max_level: 3
     weight: 12
     base_value: 0.15
     value_per_level: 0.15
   last_stand:
     display_name: "絕地反擊"
+    type: ABILITY
     max_level: 5
     weight: 15
     base_value: 0.02
     value_per_level: 0.02
   combo_finisher:
     display_name: "精準連擊"
+    type: ABILITY
     max_level: 1
     weight: 5
     base_value: 2.0
     value_per_level: 0.0
 
-ability_affixes:
-  # B 流派：生存防禦
+  # 生存防禦類
   phase_shift:
     display_name: "相位閃避"
+    type: ABILITY
     max_level: 3
     weight: 8
     base_value: 0.05
     value_per_level: 0.05
   reflective_shell:
     display_name: "反震甲殼"
+    type: ABILITY
     max_level: 4
     weight: 8
     base_value: 0.15
     value_per_level: 0.15
   life_steal:
     display_name: "飲血"
+    type: ABILITY
     max_level: 3
     weight: 10
     base_value: 0.03
     value_per_level: 0.03
   lifeline_shield:
     display_name: "瀕死護盾"
+    type: ABILITY
     max_level: 3
     weight: 8
     base_value: 0.15
     value_per_level: 0.15
 
-  # C 流派：功能探索
+  # 功能探索類
   geological_radar:
     display_name: "地質雷達"
+    type: ABILITY
     max_level: 3
     weight: 10
     base_value: 4.0
     value_per_level: 4.0
   xp_vacuum:
     display_name: "經驗引力"
+    type: ABILITY
     max_level: 5
     weight: 15
     base_value: 2.0
     value_per_level: 2.0
   hydro_phobic:
     display_name: "液體排斥"
+    type: ABILITY
     max_level: 2
     weight: 10
     base_value: 0.25
     value_per_level: 0.25
   looting_mastery:
     display_name: "幸運眷顧"
+    type: ABILITY
     max_level: 3
     weight: 12
     base_value: 1.0
     value_per_level: 1.0
 
-  # D 流派：惡魔詛咒 (權重較低)
+  # 惡魔詛咒類
   fragile:
     display_name: "易損壞"
+    type: ABILITY
     max_level: 1
     weight: 2
     base_value: 3.0
     value_per_level: 0.0
   pearl_void:
     display_name: "珍珠銷毀"
+    type: ABILITY
     max_level: 1
     weight: 2
     base_value: 1.0
     value_per_level: 0.0
 
-  # E 流派：裝飾
+  # 裝飾類
   rainbow:
     display_name: "七彩虹"
+    type: ABILITY
     max_level: 1
     weight: 5
     base_value: 1.0
     value_per_level: 0.0
   shimmer:
     display_name: "光影流動"
+    type: ABILITY
     max_level: 1
     weight: 5
     base_value: 1.0
     value_per_level: 0.0
   size_reduce:
     display_name: "你睇我唔到"
+    type: ABILITY
     max_level: 5
     weight: 3
     base_value: 0.20
     value_per_level: 0.20
   size_enlarge:
     display_name: "高人一等"
+    type: ABILITY
     max_level: 5
     weight: 3
     base_value: 0.20
     value_per_level: 0.20
+
+  # 基礎屬性類 (STAT)
+  max_health:
+    display_name: "生命加成"
+    type: STAT
+    max_level: 10
+    weight: 20
+    base_value: 2.0
+    value_per_level: 2.0
+  attack_damage:
+    display_name: "攻擊加成"
+    type: STAT
+    max_level: 10
+    weight: 20
+    base_value: 1.0
+    value_per_level: 1.0
+  movement_speed:
+    display_name: "速度加成"
+    type: STAT
+    max_level: 5
+    weight: 10
+    base_value: 0.02
+    value_per_level: 0.02

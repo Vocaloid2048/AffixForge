@@ -31,18 +31,11 @@ object AffixRegistry {
         templates.clear()
         totalWeight = 0
 
-        // 加載 StatAffixes
-        loadSection(config, "stat_affixes", AffixType.BASE_STAT)
-        // 加載 AbilityAffixes
-        loadSection(config, "ability_affixes", AffixType.SPECIAL_MECHANIC)
-        
-        plugin.logger.info("已加載 ${templates.size} 個詞條模板 (總權重: $totalWeight)")
-    }
-
-    private fun loadSection(config: YamlConfiguration, sectionName: String, type: AffixType) {
-        val section = config.getConfigurationSection(sectionName) ?: return
+        val section = config.getConfigurationSection("affixes") ?: return
         for (id in section.getKeys(false)) {
             val displayName = section.getString("$id.display_name") ?: id
+            val typeStr = section.getString("$id.type") ?: "ABILITY"
+            val type = try { AffixType.valueOf(typeStr) } catch (e: Exception) { AffixType.ABILITY }
             val maxLevel = section.getInt("$id.max_level", 1)
             val weight = section.getInt("$id.weight", 10)
             val baseValue = section.getDouble("$id.base_value", 0.0)
@@ -52,6 +45,8 @@ object AffixRegistry {
             templates[id] = template
             totalWeight += weight
         }
+        
+        plugin.logger.info("已加載 ${templates.size} 個全域詞條模板 (總權重: $totalWeight)")
     }
 
     fun rollRandomAffixes(quality: ReforgeQuality): List<EquipmentAffix> {
@@ -74,7 +69,7 @@ object AffixRegistry {
                         id = template.id,
                         name = template.displayName,
                         type = template.type,
-                        value = template.baseValue, // 初始為 LV 1 數值
+                        value = template.baseValue,
                         level = 1
                     )
                 )
@@ -97,9 +92,4 @@ object AffixRegistry {
     }
 
     fun getTemplate(id: String): AffixTemplate? = templates[id]
-
-    fun getRandomTemplate(excludeIds: Set<String> = emptySet()): AffixTemplate? {
-        val pool = templates.values.filter { !excludeIds.contains(it.id) }
-        return pickWeighted(pool)
-    }
 }

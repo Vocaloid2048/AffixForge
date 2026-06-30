@@ -21,10 +21,10 @@ object StatManager {
         this.plugin = plugin
     }
 
-    // 1.21+ 優先屬性獲取
     private val ATTR_MAX_HEALTH = getAttribute("MAX_HEALTH", "GENERIC_MAX_HEALTH")
     private val ATTR_ATTACK_DAMAGE = getAttribute("ATTACK_DAMAGE", "GENERIC_ATTACK_DAMAGE")
     private val ATTR_MOVEMENT_SPEED = getAttribute("MOVEMENT_SPEED", "GENERIC_MOVEMENT_SPEED")
+    private val ATTR_SCALE = getAttribute("SCALE", "GENERIC_SCALE")
 
     private fun getAttribute(vararg names: String): Attribute? {
         for (name in names) {
@@ -60,8 +60,17 @@ object StatManager {
         }
 
         val statTotals = mutableMapOf<String, Double>()
-        allAffixes.filter { it.type == AffixType.BASE_STAT || it.type == AffixType.SPECIAL_MECHANIC }.forEach { affix ->
-            statTotals[affix.id] = statTotals.getOrDefault(affix.id, 0.0) + affix.value
+        allAffixes.forEach { affix ->
+            if (affix.type == AffixType.STAT) {
+                statTotals[affix.id] = statTotals.getOrDefault(affix.id, 0.0) + (affix.value * affix.level)
+            }
+            // 特別處理裝飾類體型變化
+            if (affix.id == "size_reduce") {
+                statTotals["scale"] = statTotals.getOrDefault("scale", 0.0) - (affix.level * 0.20)
+            }
+            if (affix.id == "size_enlarge") {
+                statTotals["scale"] = statTotals.getOrDefault("scale", 0.0) + (affix.level * 0.20)
+            }
         }
 
         // 套裝加成
@@ -75,13 +84,13 @@ object StatManager {
         ATTR_MAX_HEALTH?.let { applyAttribute(player, it, (statTotals["max_health"] ?: 0.0) + extraHealthFromSets) }
         ATTR_ATTACK_DAMAGE?.let { applyAttribute(player, it, statTotals["attack_damage"] ?: 0.0) }
         ATTR_MOVEMENT_SPEED?.let { applyAttribute(player, it, statTotals["movement_speed"] ?: 0.0) }
+        ATTR_SCALE?.let { applyAttribute(player, it, statTotals["scale"] ?: 0.0) }
     }
 
     private fun applyAttribute(player: Player, attribute: Attribute, value: Double) {
         val instance = player.getAttribute(attribute) ?: return
         val key = NamespacedKey(plugin, "affix_${attribute.name().lowercase()}")
 
-        // 移除舊加成 (1.21 推薦方式)
         instance.modifiers.forEach { modifier ->
             if (modifier.key == key) {
                 instance.removeModifier(modifier)
@@ -89,7 +98,6 @@ object StatManager {
         }
 
         if (value != 0.0) {
-            // 1.21+ 使用 NamespacedKey 構造函數
             val modifier = AttributeModifier(key, value, Operation.ADD_NUMBER, EquipmentSlotGroup.ANY)
             instance.addModifier(modifier)
         }
