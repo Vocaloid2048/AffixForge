@@ -1,6 +1,7 @@
 package com.voc2048.affixForge.renderer
 
 import com.voc2048.affixForge.data.AffixRegistry
+import com.voc2048.affixForge.data.AffixValueRegistry
 import com.voc2048.affixForge.model.EquipmentAffix
 import com.voc2048.affixForge.model.ReforgeQuality
 import com.voc2048.affixForge.util.maxSlots
@@ -22,7 +23,7 @@ object AffixLoreRenderer {
 
         // 1. 第一行：品質與槽位狀態
         val maxSlots = item.maxSlots
-        val usedSlots = affixes.size // 目前簡單以詞條數量計算，後續若附魔佔位可調整
+        val usedSlots = affixes.size 
         
         lore.add(Component.empty())
         lore.add(
@@ -41,23 +42,15 @@ object AffixLoreRenderer {
             lore.add(Component.text("尚未鑑定").color(NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, true))
         } else {
             affixes.forEach { affix ->
-                val template = AffixRegistry.getTemplate(affix.id)
                 val romanLevel = ROMAN_NUMERALS[affix.level] ?: affix.level.toString()
-                
-                // 根據數值格式化顯示文字 (例如百分比)
-                val isPercentage = affix.id.contains("rate") || affix.id.contains("damage") || affix.id.contains("steal") || affix.id.contains("contract") || affix.id.contains("speed")
-                val valueDisplay = if (isPercentage) {
-                    String.format("%.0f%%", affix.value * 100)
-                } else {
-                    String.format("%.1f", affix.value)
-                }
+                val description = AffixValueRegistry.getDescription(affix.id, affix.level)
 
                 val line = Component.text(" ⚔ ")
                     .color(NamedTextColor.RED)
                     .decoration(TextDecoration.ITALIC, false)
                     .append(Component.text("${affix.name} $romanLevel").color(NamedTextColor.WHITE))
                     .append(Component.text(" (").color(NamedTextColor.GRAY))
-                    .append(Component.text(if (affix.value >= 0) "+$valueDisplay" else valueDisplay).color(NamedTextColor.YELLOW))
+                    .append(Component.text(description).color(NamedTextColor.GRAY))
                     .append(Component.text(")").color(NamedTextColor.GRAY))
                 
                 lore.add(line)
