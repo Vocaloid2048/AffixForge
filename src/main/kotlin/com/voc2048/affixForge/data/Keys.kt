@@ -8,11 +8,13 @@ object Keys {
     lateinit var QUALITY: NamespacedKey
     lateinit var CUSTOM_ACCESSORY: NamespacedKey
     lateinit var SET_ID: NamespacedKey
+    lateinit var MAX_SLOTS: NamespacedKey
 
     fun init(plugin: JavaPlugin) {
         AFFIXES = NamespacedKey(plugin, "affixes")
         QUALITY = NamespacedKey(plugin, "quality")
         CUSTOM_ACCESSORY = NamespacedKey(plugin, "custom_accessory")
         SET_ID = NamespacedKey(plugin, "set_id")
+        MAX_SLOTS = NamespacedKey(plugin, "max_slots")
     }
 }

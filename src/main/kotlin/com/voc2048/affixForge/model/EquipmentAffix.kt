@@ -11,5 +11,6 @@ data class EquipmentAffix(
     val id: String,
     val name: String,
     val type: AffixType,
-    val value: Double
+    val value: Double,
+    val level: Int = 1
 )
