@@ -1,9 +1,12 @@
 package com.voc2048.affixForge.command
 
 import com.voc2048.affixForge.data.AffixListDataType
-import com.voc2048.affixForge.data.Keys
 import com.voc2048.affixForge.data.AffixRegistry
-import com.voc2048.affixForge.gui.ReforgeGUI
+import com.voc2048.affixForge.data.CustomItems
+import com.voc2048.affixForge.data.Keys
+import com.voc2048.affixForge.gui.AuthenticationGUI
+import com.voc2048.affixForge.gui.ReforgingGUI
+import com.voc2048.affixForge.gui.UpgradeGUI
 import com.voc2048.affixForge.logic.ReforgeManager
 import com.voc2048.affixForge.model.ReforgeQuality
 import com.voc2048.affixForge.model.ReforgeResult
@@ -24,12 +27,24 @@ class AffixCommand(private val plugin: JavaPlugin) : CommandExecutor, TabComplet
             return true
         }
 
-        if (args.isEmpty() || args[0] == "gui") {
-            ReforgeGUI(plugin, sender)
+        if (args.isEmpty()) {
+            sender.sendMessage(Component.text("請輸入子指令: gui, give, getingot").color(NamedTextColor.YELLOW))
             return true
         }
 
-        when (args[0]) {
+        when (args[0].lowercase()) {
+            "gui" -> {
+                if (args.size < 2) {
+                    sender.sendMessage(Component.text("請指定 GUI 類型: auth, reforge, upgrade").color(NamedTextColor.YELLOW))
+                    return true
+                }
+                when (args[1].lowercase()) {
+                    "auth" -> AuthenticationGUI(plugin, sender)
+                    "reforge" -> ReforgingGUI(plugin, sender)
+                    "upgrade" -> UpgradeGUI(plugin, sender)
+                    else -> sender.sendMessage(Component.text("無效的 GUI 類型").color(NamedTextColor.RED))
+                }
+            }
             "give" -> {
                 if (args.size < 2) return false
                 val qualityStr = args[1].uppercase()
@@ -63,31 +78,9 @@ class AffixCommand(private val plugin: JavaPlugin) : CommandExecutor, TabComplet
                         .color(NamedTextColor.GREEN)
                 )
             }
-            "reforge" -> {
-                val item = sender.inventory.itemInMainHand
-                if (item.type.isAir) {
-                    sender.sendMessage(Component.text("請手持物品").color(NamedTextColor.RED))
-                    return true
-                }
-
-                val lockedIndices = if (args.size > 1) {
-                    args[1].split(",").mapNotNull { it.toIntOrNull()?.minus(1) }
-                } else {
-                    emptyList()
-                }
-
-                val result = ReforgeManager.reforgeItem(item, lockedIndices)
-                when (result) {
-                    is ReforgeResult.Success -> {
-                        sender.sendMessage(
-                            Component.text("重鑄成功！消耗了 ${result.lapisCost} 個青金石和 ${result.diamondBlockCost} 個鑽石磚。")
-                                .color(NamedTextColor.GREEN)
-                        )
-                    }
-                    is ReforgeResult.Failure -> {
-                        sender.sendMessage(Component.text("重鑄失敗: ${result.message}").color(NamedTextColor.RED))
-                    }
-                }
+            "getingot" -> {
+                sender.inventory.addItem(CustomItems.getChalcedonyIngot())
+                sender.sendMessage(Component.text("已獲得玉髓錠").color(NamedTextColor.GREEN))
             }
             "setaccessory" -> {
                 val item = sender.inventory.itemInMainHand
@@ -118,16 +111,12 @@ class AffixCommand(private val plugin: JavaPlugin) : CommandExecutor, TabComplet
     }
 
     override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String> {
-        if (args.size == 1) return listOf("give", "reforge", "setaccessory", "setid", "gui")
+        if (args.size == 1) return listOf("gui", "give", "getingot", "setaccessory", "setid")
         if (args.size == 2) {
-            if (args[0] == "give") {
-                return ReforgeQuality.entries.map { it.name.lowercase() }.filter { it.startsWith(args[1].lowercase()) }
-            }
-            if (args[0] == "reforge") {
-                return listOf("1", "1,2", "1,2,3", "1,2,3,4")
-            }
-            if (args[0] == "setid") {
-                return listOf("warrior", "mage", "archer")
+            when (args[0].lowercase()) {
+                "gui" -> return listOf("auth", "reforge", "upgrade")
+                "give" -> return ReforgeQuality.entries.map { it.name.lowercase() }.filter { it.startsWith(args[1].lowercase()) }
+                "setid" -> return listOf("warrior", "mage", "archer")
             }
         }
         return emptyList()

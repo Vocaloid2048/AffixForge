@@ -4,11 +4,13 @@ import com.voc2048.affixForge.data.AffixListDataType
 import com.voc2048.affixForge.data.Keys
 import com.voc2048.affixForge.logic.ReforgeManager
 import com.voc2048.affixForge.model.ReforgeResult
+import com.voc2048.affixForge.util.isAuthenticated
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -18,9 +20,9 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 
-class ReforgeGUI(private val plugin: JavaPlugin, private val player: Player) : Listener {
+class ReforgingGUI(private val plugin: JavaPlugin, private val player: Player) : Listener {
 
-    private val inventory: Inventory = Bukkit.createInventory(null, 54, Component.text("裝備重鑄台"))
+    private val inventory: Inventory = Bukkit.createInventory(null, 54, Component.text("鍛造洗練與鎖定台"))
     private val lockedIndices = mutableSetOf<Int>()
 
     companion object {
@@ -40,41 +42,44 @@ class ReforgeGUI(private val plugin: JavaPlugin, private val player: Player) : L
 
     private fun setupDecorations() {
         val glass = ItemStack(Material.GRAY_STAINED_GLASS_PANE).apply {
-            val meta = itemMeta
-            meta.displayName(Component.empty())
-            itemMeta = meta
+            editMeta { it.displayName(Component.empty()) }
         }
         for (i in 0 until 54) {
             if (i == EQUIPMENT_SLOT || i == LAPIS_SLOT || i == DIAMOND_BLOCK_SLOT || 
                 i == REFORGE_BUTTON_SLOT || i in AFFIX_DISPLAY_SLOTS || i in LOCK_BUTTON_SLOTS) continue
             inventory.setItem(i, glass)
         }
-
         updateReforgeButton()
         updateAffixDisplay()
     }
 
     private fun updateReforgeButton() {
         val button = ItemStack(Material.ANVIL).apply {
-            val meta = itemMeta
-            meta.displayName(Component.text("開始重鑄").color(NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false))
-            val lore = mutableListOf<Component>()
-            lore.add(Component.text("點擊開始洗煉裝備").color(NamedTextColor.YELLOW))
-            lore.add(Component.empty())
-            lore.add(Component.text("基礎消耗: 3x 青金石").color(NamedTextColor.GRAY))
-            if (lockedIndices.isNotEmpty()) {
-                val cost = Math.pow(2.0, (lockedIndices.size - 1).toDouble()).toInt()
-                lore.add(Component.text("鎖定消耗: $cost x 鑽石磚").color(NamedTextColor.AQUA))
+            editMeta { meta ->
+                meta.displayName(Component.text("開始洗練").color(NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false))
+                val lore = mutableListOf<Component>()
+                lore.add(Component.text("點擊隨機重置未鎖定詞條").color(NamedTextColor.YELLOW))
+                lore.add(Component.empty())
+                lore.add(Component.text("消耗: 3x 青金石").color(NamedTextColor.GRAY))
+                if (lockedIndices.isNotEmpty()) {
+                    val cost = Math.pow(2.0, (lockedIndices.size - 1).toDouble()).toInt()
+                    lore.add(Component.text("鎖定消耗: $cost x 鑽石磚").color(NamedTextColor.AQUA))
+                }
+                meta.lore(lore)
             }
-            meta.lore(lore)
-            itemMeta = meta
         }
         inventory.setItem(REFORGE_BUTTON_SLOT, button)
     }
 
     private fun updateAffixDisplay() {
         val item = inventory.getItem(EQUIPMENT_SLOT)
-        val affixes = item?.itemMeta?.persistentDataContainer?.get(Keys.AFFIXES, AffixListDataType) ?: emptyList()
+        if (item == null || !item.isAuthenticated()) {
+            AFFIX_DISPLAY_SLOTS.forEach { inventory.setItem(it, null) }
+            LOCK_BUTTON_SLOTS.forEach { inventory.setItem(it, null) }
+            return
+        }
+
+        val affixes = item.itemMeta?.persistentDataContainer?.get(Keys.AFFIXES, AffixListDataType) ?: emptyList()
 
         for (i in 0 until 5) {
             val displaySlot = AFFIX_DISPLAY_SLOTS[i]
@@ -83,26 +88,26 @@ class ReforgeGUI(private val plugin: JavaPlugin, private val player: Player) : L
             if (i < affixes.size) {
                 val affix = affixes[i]
                 val displayItem = ItemStack(Material.PAPER).apply {
-                    val meta = itemMeta
-                    meta.displayName(Component.text(affix.name).color(NamedTextColor.GREEN))
-                    meta.lore(listOf(Component.text("數值: ${affix.value}").color(NamedTextColor.YELLOW)))
-                    itemMeta = meta
+                    editMeta { meta ->
+                        meta.displayName(Component.text(affix.name).color(NamedTextColor.GREEN))
+                        meta.lore(listOf(Component.text("等級: ${affix.level}").color(NamedTextColor.GRAY)))
+                    }
                 }
                 inventory.setItem(displaySlot, displayItem)
 
                 val isLocked = lockedIndices.contains(i)
                 val lockItem = ItemStack(if (isLocked) Material.IRON_TRAPDOOR else Material.OAK_TRAPDOOR).apply {
-                    val meta = itemMeta
-                    meta.displayName(
-                        Component.text(if (isLocked) "已鎖定" else "未鎖定")
-                            .color(if (isLocked) NamedTextColor.RED else NamedTextColor.GRAY)
-                    )
-                    if (i == 4) {
-                        meta.lore(listOf(Component.text("第 5 個詞條無法鎖定").color(NamedTextColor.DARK_RED)))
-                    } else {
-                        meta.lore(listOf(Component.text("點擊切換鎖定狀態").color(NamedTextColor.YELLOW)))
+                    editMeta { meta ->
+                        meta.displayName(
+                            Component.text(if (isLocked) "已鎖定" else "未鎖定")
+                                .color(if (isLocked) NamedTextColor.RED else NamedTextColor.GRAY)
+                        )
+                        if (i == 4) {
+                            meta.lore(listOf(Component.text("第 5 個詞條無法鎖定").color(NamedTextColor.DARK_RED)))
+                        } else {
+                            meta.lore(listOf(Component.text("點擊切換鎖定狀態").color(NamedTextColor.YELLOW)))
+                        }
                     }
-                    itemMeta = meta
                 }
                 inventory.setItem(lockSlot, lockItem)
             } else {
@@ -115,7 +120,6 @@ class ReforgeGUI(private val plugin: JavaPlugin, private val player: Player) : L
     @EventHandler
     fun onClick(event: InventoryClickEvent) {
         if (event.inventory != inventory) return
-        
         val slot = event.rawSlot
         
         if (slot < 54 && (inventory.getItem(slot)?.type == Material.GRAY_STAINED_GLASS_PANE || slot == REFORGE_BUTTON_SLOT || slot in AFFIX_DISPLAY_SLOTS)) {
@@ -128,7 +132,9 @@ class ReforgeGUI(private val plugin: JavaPlugin, private val player: Player) : L
             if (index == 4) return
             
             val item = inventory.getItem(EQUIPMENT_SLOT)
-            val affixes = item?.itemMeta?.persistentDataContainer?.get(Keys.AFFIXES, AffixListDataType) ?: emptyList()
+            if (item == null || !item.isAuthenticated()) return
+            
+            val affixes = item.itemMeta?.persistentDataContainer?.get(Keys.AFFIXES, AffixListDataType) ?: emptyList()
             if (index >= affixes.size) return
 
             if (lockedIndices.contains(index)) {
@@ -154,12 +160,18 @@ class ReforgeGUI(private val plugin: JavaPlugin, private val player: Player) : L
         Bukkit.getScheduler().runTask(plugin, Runnable {
             if (slot == EQUIPMENT_SLOT || event.isShiftClick) {
                 updateAffixDisplay()
+                updateReforgeButton()
             }
         })
     }
 
     private fun handleReforge() {
-        val item = inventory.getItem(EQUIPMENT_SLOT) ?: return
+        val item = inventory.getItem(EQUIPMENT_SLOT)
+        if (item == null || !item.isAuthenticated()) {
+            player.sendMessage(Component.text("請放入已鑑定的裝備").color(NamedTextColor.RED))
+            return
+        }
+        
         val lapis = inventory.getItem(LAPIS_SLOT) ?: ItemStack(Material.AIR)
         val diamonds = inventory.getItem(DIAMOND_BLOCK_SLOT) ?: ItemStack(Material.AIR)
 
@@ -181,7 +193,8 @@ class ReforgeGUI(private val plugin: JavaPlugin, private val player: Player) : L
             lapis.amount -= 3
             if (diamondCost > 0) diamonds.amount -= diamondCost
             
-            player.sendMessage(Component.text("重鑄成功！").color(NamedTextColor.GREEN))
+            player.playSound(player.location, Sound.BLOCK_ANVIL_USE, 1f, 1.5f)
+            player.sendMessage(Component.text("洗練完成！").color(NamedTextColor.GREEN))
             updateAffixDisplay()
         } else if (result is ReforgeResult.Failure) {
             player.sendMessage(Component.text("失敗: ${result.message}").color(NamedTextColor.RED))
@@ -191,7 +204,6 @@ class ReforgeGUI(private val plugin: JavaPlugin, private val player: Player) : L
     @EventHandler
     fun onClose(event: InventoryCloseEvent) {
         if (event.inventory != inventory) return
-        
         listOf(EQUIPMENT_SLOT, LAPIS_SLOT, DIAMOND_BLOCK_SLOT).forEach { slot ->
             val item = inventory.getItem(slot)
             if (item != null && item.type != Material.AIR) {
@@ -200,7 +212,6 @@ class ReforgeGUI(private val plugin: JavaPlugin, private val player: Player) : L
                 }
             }
         }
-        
         InventoryClickEvent.getHandlerList().unregister(this)
         InventoryCloseEvent.getHandlerList().unregister(this)
     }
