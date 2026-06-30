@@ -2,7 +2,7 @@ name: AffixForge
 version: '${version}'
 
 main: com.voc2048.affixForge.AffixForge
-api-version: '1.20'
+api-version: '26.2'
 load: POSTWORLD
 
 commands:

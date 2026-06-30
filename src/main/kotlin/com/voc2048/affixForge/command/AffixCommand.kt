@@ -4,37 +4,32 @@ import com.voc2048.affixForge.data.AffixListDataType
 import com.voc2048.affixForge.data.Keys
 import com.voc2048.affixForge.gui.ReforgeGUI
 import com.voc2048.affixForge.logic.AffixGenerator
-import com.voc2048.affixForge.model.ReforgeQuality
-import com.voc2048.affixForge.renderer.AffixLoreRenderer
 import com.voc2048.affixForge.logic.ReforgeManager
+import com.voc2048.affixForge.model.ReforgeQuality
 import com.voc2048.affixForge.model.ReforgeResult
+import com.voc2048.affixForge.renderer.AffixLoreRenderer
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
-import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
 import org.bukkit.entity.Player
+import org.bukkit.plugin.java.JavaPlugin
 
-class AffixCommand : CommandExecutor, TabCompleter {
+class AffixCommand(private val plugin: JavaPlugin) : CommandExecutor, TabCompleter {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender !is Player) {
             sender.sendMessage("只有玩家可以使用此指令")
             return true
         }
 
-        if (args.isEmpty()) {
-            val gui = ReforgeGUI(sender)
-            Bukkit.getPluginManager().registerEvents(gui, Bukkit.getPluginManager().getPlugin("AffixForge")!!)
+        if (args.isEmpty() || args[0] == "gui") {
+            ReforgeGUI(plugin, sender)
             return true
         }
 
         when (args[0]) {
-            "gui" -> {
-                val gui = ReforgeGUI(sender)
-                Bukkit.getPluginManager().registerEvents(gui, Bukkit.getPluginManager().getPlugin("AffixForge")!!)
-            }
             "give" -> {
                 if (args.size < 2) return false
                 val qualityStr = args[1].uppercase()
@@ -75,7 +70,6 @@ class AffixCommand : CommandExecutor, TabCompleter {
                     return true
                 }
 
-                // 解析鎖定索引 (例如: /affix reforge 1,2)
                 val lockedIndices = if (args.size > 1) {
                     args[1].split(",").mapNotNull { it.toIntOrNull()?.minus(1) }
                 } else {

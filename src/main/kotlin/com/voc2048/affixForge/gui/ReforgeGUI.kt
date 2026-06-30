@@ -16,9 +16,9 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import org.bukkit.persistence.PersistentDataType
+import org.bukkit.plugin.java.JavaPlugin
 
-class ReforgeGUI(private val player: Player) : Listener {
+class ReforgeGUI(private val plugin: JavaPlugin, private val player: Player) : Listener {
 
     private val inventory: Inventory = Bukkit.createInventory(null, 54, Component.text("裝備重鑄台"))
     private val lockedIndices = mutableSetOf<Int>()
@@ -35,6 +35,7 @@ class ReforgeGUI(private val player: Player) : Listener {
     init {
         setupDecorations()
         player.openInventory(inventory)
+        Bukkit.getPluginManager().registerEvents(this, plugin)
     }
 
     private fun setupDecorations() {
@@ -117,16 +118,14 @@ class ReforgeGUI(private val player: Player) : Listener {
         
         val slot = event.rawSlot
         
-        // 禁止取出裝飾物品
         if (slot < 54 && (inventory.getItem(slot)?.type == Material.GRAY_STAINED_GLASS_PANE || slot == REFORGE_BUTTON_SLOT || slot in AFFIX_DISPLAY_SLOTS)) {
             event.isCancelled = true
         }
 
-        // 點擊鎖定按鈕
         if (slot in LOCK_BUTTON_SLOTS) {
             event.isCancelled = true
             val index = LOCK_BUTTON_SLOTS.indexOf(slot)
-            if (index == 4) return // 第 5 個不能鎖
+            if (index == 4) return
             
             val item = inventory.getItem(EQUIPMENT_SLOT)
             val affixes = item?.itemMeta?.persistentDataContainer?.get(Keys.AFFIXES, AffixListDataType) ?: emptyList()
@@ -146,15 +145,13 @@ class ReforgeGUI(private val player: Player) : Listener {
             return
         }
 
-        // 點擊重鑄按鈕
         if (slot == REFORGE_BUTTON_SLOT) {
             event.isCancelled = true
             handleReforge()
             return
         }
 
-        // 當物品放入或取出設備槽時更新顯示
-        Bukkit.getScheduler().runTask(Bukkit.getPluginManager().getPlugin("AffixForge")!!, Runnable {
+        Bukkit.getScheduler().runTask(plugin, Runnable {
             if (slot == EQUIPMENT_SLOT || event.isShiftClick) {
                 updateAffixDisplay()
             }
@@ -166,7 +163,6 @@ class ReforgeGUI(private val player: Player) : Listener {
         val lapis = inventory.getItem(LAPIS_SLOT) ?: ItemStack(Material.AIR)
         val diamonds = inventory.getItem(DIAMOND_BLOCK_SLOT) ?: ItemStack(Material.AIR)
 
-        // 預檢材料
         if (lapis.type != Material.LAPIS_LAZULI || lapis.amount < 3) {
             player.sendMessage(Component.text("青金石不足 (需要 3 個)").color(NamedTextColor.RED))
             return
@@ -180,7 +176,6 @@ class ReforgeGUI(private val player: Player) : Listener {
             }
         }
 
-        // 執行重鑄
         val result = ReforgeManager.reforgeItem(item, lockedIndices.toList())
         if (result is ReforgeResult.Success) {
             lapis.amount -= 3
@@ -197,7 +192,6 @@ class ReforgeGUI(private val player: Player) : Listener {
     fun onClose(event: InventoryCloseEvent) {
         if (event.inventory != inventory) return
         
-        // 返還物品
         listOf(EQUIPMENT_SLOT, LAPIS_SLOT, DIAMOND_BLOCK_SLOT).forEach { slot ->
             val item = inventory.getItem(slot)
             if (item != null && item.type != Material.AIR) {
