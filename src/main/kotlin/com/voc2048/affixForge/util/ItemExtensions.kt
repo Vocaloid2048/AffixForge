@@ -38,3 +38,9 @@ var ItemStack.quality: ReforgeQuality?
     }
 
 fun ItemStack.isAuthenticated(): Boolean = quality != null
+
+fun ItemStack.updateLore() {
+    val affixes = this.getAffixes()
+    val quality = this.quality ?: return
+    com.voc2048.affixForge.renderer.AffixLoreRenderer.render(this, quality, affixes)
+}
