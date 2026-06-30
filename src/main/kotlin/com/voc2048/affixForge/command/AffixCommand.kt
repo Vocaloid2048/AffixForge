@@ -2,6 +2,7 @@ package com.voc2048.affixForge.command
 
 import com.voc2048.affixForge.data.AffixListDataType
 import com.voc2048.affixForge.data.Keys
+import com.voc2048.affixForge.gui.ReforgeGUI
 import com.voc2048.affixForge.logic.AffixGenerator
 import com.voc2048.affixForge.model.ReforgeQuality
 import com.voc2048.affixForge.renderer.AffixLoreRenderer
@@ -9,6 +10,7 @@ import com.voc2048.affixForge.logic.ReforgeManager
 import com.voc2048.affixForge.model.ReforgeResult
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -22,9 +24,17 @@ class AffixCommand : CommandExecutor, TabCompleter {
             return true
         }
 
-        if (args.isEmpty()) return false
+        if (args.isEmpty()) {
+            val gui = ReforgeGUI(sender)
+            Bukkit.getPluginManager().registerEvents(gui, Bukkit.getPluginManager().getPlugin("AffixForge")!!)
+            return true
+        }
 
         when (args[0]) {
+            "gui" -> {
+                val gui = ReforgeGUI(sender)
+                Bukkit.getPluginManager().registerEvents(gui, Bukkit.getPluginManager().getPlugin("AffixForge")!!)
+            }
             "give" -> {
                 if (args.size < 2) return false
                 val qualityStr = args[1].uppercase()
@@ -114,7 +124,7 @@ class AffixCommand : CommandExecutor, TabCompleter {
     }
 
     override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String> {
-        if (args.size == 1) return listOf("give", "reforge", "setaccessory", "setid")
+        if (args.size == 1) return listOf("give", "reforge", "setaccessory", "setid", "gui")
         if (args.size == 2) {
             if (args[0] == "give") {
                 return ReforgeQuality.entries.map { it.name.lowercase() }.filter { it.startsWith(args[1].lowercase()) }
