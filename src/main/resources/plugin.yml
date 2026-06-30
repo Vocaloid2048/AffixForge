@@ -8,5 +8,6 @@ load: POSTWORLD
 commands:
   affix:
     description: "Affix management command"
-    usage: "/affix give <quality>"
+    usage: "/affix"
     permission: "affixforge.admin"
+    aliases: [affixforge]

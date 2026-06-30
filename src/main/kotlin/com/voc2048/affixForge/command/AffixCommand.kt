@@ -5,6 +5,7 @@ import com.voc2048.affixForge.data.AffixRegistry
 import com.voc2048.affixForge.data.CustomItems
 import com.voc2048.affixForge.data.Keys
 import com.voc2048.affixForge.gui.AuthenticationGUI
+import com.voc2048.affixForge.gui.MenuGUI
 import com.voc2048.affixForge.gui.ReforgingGUI
 import com.voc2048.affixForge.gui.UpgradeGUI
 import com.voc2048.affixForge.logic.ReforgeManager
@@ -28,7 +29,7 @@ class AffixCommand(private val plugin: JavaPlugin) : CommandExecutor, TabComplet
         }
 
         if (args.isEmpty()) {
-            sender.sendMessage(Component.text("請輸入子指令: gui, give, getingot").color(NamedTextColor.YELLOW))
+            MenuGUI(plugin, sender)
             return true
         }
 
